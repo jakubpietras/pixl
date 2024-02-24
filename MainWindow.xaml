@@ -1,0 +1,35 @@
+﻿<Window x:Class="Pixl.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Pixl" Height="450" Width="800">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Load" />
+                <MenuItem Header="Save" />
+            </MenuItem>
+            <MenuItem Header="About" />
+        </Menu>
+        <Border BorderBrush="Gainsboro" BorderThickness="1">
+            <StackPanel DockPanel.Dock="Left" Width="270" Margin="5">
+                <WrapPanel>
+                    <TextBlock Text="Hello :)" />
+                </WrapPanel>
+                <Separator />
+                <TextBlock Text="Here I will have my own control!" />
+            </StackPanel>
+        </Border>
+        <Border BorderBrush="Gainsboro" BorderThickness="1">
+            <StackPanel DockPanel.Dock="Right" Margin="5">
+                <DockPanel>
+                    <Image DockPanel.Dock="Top">
+                        <!-- Here goes the original image -->
+                    </Image>
+                    <Image DockPanel.Dock="Bottom">
+                        <!-- Here goes the modified image -->
+                    </Image>
+                </DockPanel>
+            </StackPanel>
+        </Border>
+    </DockPanel>
+</Window>
