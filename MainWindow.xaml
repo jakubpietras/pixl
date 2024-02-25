@@ -5,8 +5,8 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
-                <MenuItem Header="Load" />
-                <MenuItem Header="Save" />
+                <MenuItem Header="Load..." Click="Load_Click"/>
+                <MenuItem Header="Save..." Click="Save_Click"/>
             </MenuItem>
             <MenuItem Header="About" />
         </Menu>
@@ -21,14 +21,16 @@
         </Border>
         <Border BorderBrush="Gainsboro" BorderThickness="1">
             <StackPanel DockPanel.Dock="Right" Margin="5">
-                <DockPanel>
-                    <Image DockPanel.Dock="Top">
-                        <!-- Here goes the original image -->
-                    </Image>
-                    <Image DockPanel.Dock="Bottom">
-                        <!-- Here goes the modified image -->
-                    </Image>
-                </DockPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Image Name="OriginalImage" Grid.Column="0" Stretch="UniformToFill"/>
+                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch"/>
+                    <Image Grid.Column="2" Name="FilteredImage" Stretch="UniformToFill" />
+                </Grid>
             </StackPanel>
         </Border>
     </DockPanel>
