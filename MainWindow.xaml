@@ -20,18 +20,19 @@
             </StackPanel>
         </Border>
         <Border BorderBrush="Gainsboro" BorderThickness="1">
-            <StackPanel DockPanel.Dock="Right" Margin="5">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="5"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Image Name="OriginalImage" Grid.Column="0" Stretch="UniformToFill"/>
-                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch"/>
-                    <Image Grid.Column="2" Name="FilteredImage" Stretch="UniformToFill" />
-                </Grid>
-            </StackPanel>
+            <Grid DockPanel.Dock="Right" Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <Image Name="OriginalImage" Stretch="None"/>
+                </ScrollViewer>
+                <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <Image Name="FilteredImage" Stretch="None"/>
+                </ScrollViewer>
+            </Grid>
         </Border>
     </DockPanel>
 </Window>
+
