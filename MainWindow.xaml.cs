@@ -28,7 +28,8 @@ namespace Pixl
         public MainWindow()
         {
             InitializeComponent();
-            Processor = new FilterProcessor(BitmapFiltered);
+
+            Processor = new FilterProcessor();
             Filters = new Dictionary<string, IFilter>();
 
             // ----- Initial set of filters -----
@@ -81,8 +82,7 @@ namespace Pixl
         private void About_Click(object sender, RoutedEventArgs e)
         {
             Processor.Filter = Filters["Gamma-2"];
-            Processor.BitmapFiltered = BitmapFiltered;
-            Processor.applyFilter();
+            Processor.applyFilter(BitmapFiltered);
             UpdateFilteredImage();
         }
 
@@ -98,7 +98,6 @@ namespace Pixl
             // Bitmap from the original image
             Bitmap bitmap = new Bitmap(imagePath);
             BitmapFiltered = BitmapDefault = bitmap;
-            Processor.BitmapFiltered = bitmap;
 
             // At first set both fields to the same image
             OriginalImage.Source = FilteredImage.Source = bitmapImg;
@@ -138,8 +137,7 @@ namespace Pixl
             if (filterName != null)
             {
                 Processor.Filter = Filters[filterName];
-                Processor.BitmapFiltered = BitmapFiltered;
-                Processor.applyFilter();
+                Processor.applyFilter(BitmapFiltered);
                 UpdateFilteredImage();
             }
         }
