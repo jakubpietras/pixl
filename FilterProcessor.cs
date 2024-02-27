@@ -10,25 +10,24 @@ namespace Pixl
 {
     internal class FilterProcessor
     {
-        IFilter? _filter;
-        Bitmap? _bmp;
-        FilterProcessor()
+        public IFilter? Filter { get; set; }
+        public Bitmap BitmapFiltered { get; set; }
+        public FilterProcessor(Bitmap bitmapFiltered)
         {
-            _filter = null;
-            _bmp = null;
+            Filter = null;
+            BitmapFiltered = bitmapFiltered;
         }
-        public IFilter Filter { set { _filter = value; } }
         public void applyFilter()
         {
-            if (_filter != null && _bmp != null)
+            if (Filter == null)
             {
-                // Processing logic
-                
+                throw new Exception("Filter must be chosen");
             }
             else
             {
-                throw new Exception("Error processing the image");
+                Filter.Apply(BitmapFiltered);
             }
+            
         }
         
     }

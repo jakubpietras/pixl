@@ -8,7 +8,7 @@
                 <MenuItem Header="Load..." Click="Load_Click"/>
                 <MenuItem Header="Save..." Click="Save_Click"/>
             </MenuItem>
-            <MenuItem Header="About" />
+            <MenuItem Header="About" Click="About_Click"/>
         </Menu>
         <Border BorderBrush="Gainsboro" BorderThickness="1">
             <StackPanel DockPanel.Dock="Left" Width="270" Margin="5">

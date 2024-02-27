@@ -18,13 +18,20 @@ namespace Pixl
 {
     public partial class MainWindow : Window
     { 
-        BitmapImage ImageDefault { get; set; }
-        Bitmap BitmapDefault { get; set; }
+        BitmapImage? ImageDefault { get; set; }
+        BitmapImage? ImageFiltered { get; set; }
+        Bitmap? BitmapDefault { get; set; }
         Bitmap BitmapFiltered { get; set; }
+        Dictionary<string, IFilter> Filters;
+        FilterProcessor? Processor { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = this;
+            Processor = new FilterProcessor(BitmapFiltered);
+            Filters = new Dictionary<string, IFilter>();
+            Filters["Gamma-0.25"] = new GammaFilter("Gamma", 0.25f);
+            Filters["Gamma-2"] = new GammaFilter("Gamma", 2f);
         }
 
         private void Load_Click(object sender, RoutedEventArgs e)
@@ -39,11 +46,7 @@ namespace Pixl
         }
 
         
-        // Some handler for applying filters will do
-        // processor.Filter = ...
-        // processor.Bitmap = ...
-        // processor.applyFilter()
-        // FilteredImage.Source = Convert(processor.Bitmap)
+
 
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -75,6 +78,7 @@ namespace Pixl
             // Bitmap from the original image
             Bitmap bitmap = new Bitmap(imagePath);
             BitmapFiltered = BitmapDefault = bitmap;
+            Processor.BitmapFiltered = bitmap;
 
             // At first set both fields to the same image
             OriginalImage.Source = FilteredImage.Source = bitmapImg;
@@ -94,6 +98,25 @@ namespace Pixl
                 bitmapImage.EndInit();
             }
             return bitmapImage;
+        }
+
+        private void UpdateFilteredImage()
+        {
+            // Some handler for applying filters will do
+            // processor.Filter = ...
+            // processor.Bitmap = ...
+            // processor.applyFilter()
+            // FilteredImage.Source = Convert(processor.Bitmap)
+
+            FilteredImage.Source = BitmapToBitmapImage(BitmapFiltered);
+
+        }
+
+        private void About_Click(object sender, RoutedEventArgs e)
+        {
+            Processor.Filter = Filters["Gamma-2"];
+            Processor.applyFilter();
+            UpdateFilteredImage();
         }
     }
 }
