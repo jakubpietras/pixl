@@ -12,9 +12,14 @@
         </Menu>
         <Border BorderBrush="Gainsboro" BorderThickness="1">
             <StackPanel DockPanel.Dock="Left" Width="270" Margin="5">
-                <WrapPanel>
-                    <TextBlock Text="Hello :)" />
-                </WrapPanel>
+                <ItemsControl Name="FiltersPanel">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Content="{Binding Key}" Click="Filter_Click" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Button Content="Revert" Click="Revert_Click" />
                 <Separator />
                 <TextBlock Text="Here I will have my own control!" />
             </StackPanel>

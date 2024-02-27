@@ -11,6 +11,6 @@ namespace Pixl
     internal interface IFilter
     {
         string Name { get; }
-        void Apply(Bitmap bmp);
+        void Apply(byte[] rgbValues, int width, int height, int bytes);
     }
 }

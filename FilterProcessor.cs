@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
+﻿using System.Drawing;
 
 namespace Pixl
 {
@@ -19,16 +13,34 @@ namespace Pixl
         }
         public void applyFilter()
         {
-            if (Filter == null)
+            if (Filter == null || BitmapFiltered == null)
             {
                 throw new Exception("Filter must be chosen");
             }
             else
             {
-                Filter.Apply(BitmapFiltered);
-            }
-            
-        }
-        
+                // Locking the bitmap bits
+                Rectangle rect = new Rectangle(0, 0, BitmapFiltered.Width, BitmapFiltered.Height);
+                System.Drawing.Imaging.BitmapData bmpData =
+                    BitmapFiltered.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite,
+                    BitmapFiltered.PixelFormat);
+
+                // Getting the address of the first line
+                IntPtr bmpPtr = bmpData.Scan0;
+
+                // Byte arrays
+                int bytes = Math.Abs(bmpData.Stride) * BitmapFiltered.Height;
+                byte[] rgbValues = new byte[bytes];
+                System.Runtime.InteropServices.Marshal.Copy(bmpPtr, rgbValues, 0, bytes);
+
+
+                Filter.Apply(rgbValues, BitmapFiltered.Width, BitmapFiltered.Height, bytes);
+                
+                System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, bmpPtr, bytes);
+
+                // Unlocking the bits
+                BitmapFiltered.UnlockBits(bmpData);
+            }   
+        }  
     }
 }

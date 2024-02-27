@@ -7,12 +7,12 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Microsoft.Win32;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using static System.Net.Mime.MediaTypeNames;
+using static System.Net.WebRequestMethods;
+
 
 namespace Pixl
 {
@@ -30,8 +30,24 @@ namespace Pixl
             InitializeComponent();
             Processor = new FilterProcessor(BitmapFiltered);
             Filters = new Dictionary<string, IFilter>();
+
+            // ----- Initial set of filters -----
+            // Inversion
+            // TODO
+
+            // Brightness correction
+            // TODO
+
+            // Contrast Enhancement
+            // TODO
+
+            // Gamma correction
             Filters["Gamma-0.25"] = new GammaFilter("Gamma", 0.25f);
             Filters["Gamma-2"] = new GammaFilter("Gamma", 2f);
+            (int, int)[] points = { (0, 255), (255, 0) };
+            Filters["Inversion"] = new PolylineFilter("Inversion", points);
+
+            FiltersPanel.ItemsSource = Filters;
         }
 
         private void Load_Click(object sender, RoutedEventArgs e)
@@ -44,10 +60,6 @@ namespace Pixl
                 LoadImage(imagePath);
             }
         }
-
-        
-
-
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
@@ -66,6 +78,14 @@ namespace Pixl
                 }
             }
         }
+        private void About_Click(object sender, RoutedEventArgs e)
+        {
+            Processor.Filter = Filters["Gamma-2"];
+            Processor.BitmapFiltered = BitmapFiltered;
+            Processor.applyFilter();
+            UpdateFilteredImage();
+        }
+
         private void LoadImage(string imagePath)
         {
             // https://www.c-sharpcorner.com/UploadFile/mahesh/using-xaml-image-in-wpf/
@@ -112,11 +132,22 @@ namespace Pixl
 
         }
 
-        private void About_Click(object sender, RoutedEventArgs e)
+        private void Filter_Click(object sender, RoutedEventArgs e)
         {
-            Processor.Filter = Filters["Gamma-2"];
-            Processor.applyFilter();
-            UpdateFilteredImage();
+            string filterName = (sender as Button).Content.ToString();
+            if (filterName != null)
+            {
+                Processor.Filter = Filters[filterName];
+                Processor.BitmapFiltered = BitmapFiltered;
+                Processor.applyFilter();
+                UpdateFilteredImage();
+            }
+        }
+
+        private void Revert_Click(object sender, RoutedEventArgs e)
+        {
+           // TODO
+
         }
     }
 }
