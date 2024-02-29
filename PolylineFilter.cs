@@ -10,8 +10,8 @@ namespace Pixl
     internal class PolylineFilter : IFilter
     {
         public string Name { get; set; }
-        List<(int, int)> Points {  get; set; }
-        public PolylineFilter(string name, (int, int)[] points) 
+        public List<(int, int)> Points {  get; set; }
+        public PolylineFilter(string name, List<(int,int)> points) 
         {
             Name = name;
             Points = [.. points];
