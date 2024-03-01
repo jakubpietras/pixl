@@ -13,6 +13,8 @@ using System.Drawing.Imaging;
 using System.IO;
 using static System.Net.WebRequestMethods;
 using System.Windows.Shapes;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 
 namespace Pixl
@@ -24,32 +26,27 @@ namespace Pixl
         Bitmap? BitmapDefault { get; set; }
         Bitmap? BitmapFiltered { get; set; }
         Dictionary<string, IFilter> Filters;
-        Dictionary<string, PolylineFilter> PolylineFilters;
-        FilterProcessor? Processor { get; set; }
-
+        private ObservableCollection<PolylineFilter> PolylineFilters;
         public MainWindow()
         {
             InitializeComponent();
 
-            Processor = new FilterProcessor();
-
             // Polyline filters have editable points.
-            PolylineFilters = new Dictionary<string, PolylineFilter>();
+            PolylineFilters = new ObservableCollection<PolylineFilter>();
             // For other filters points are not defined.
             Filters = new Dictionary<string, IFilter>();
 
             // ----- Initial set of filters -----
             // Inversion
             List<(int, int)> points = [(0, 255), (255, 0)];
-            PolylineFilters["Inversion"] = new PolylineFilter("Inversion", points);
+            PolylineFilters.Add(new PolylineFilter("Inversion", points));
 
             // Brightness correction
-            PolylineFilters["Brightness+10"] = new PolylineFilter("Brightness+10", BrightnessCorrectionPolyline(10));
-            PolylineFilters["Brightness-20"] = new PolylineFilter("Brightness-20", BrightnessCorrectionPolyline(-20));
+            PolylineFilters.Add(new PolylineFilter("Brightness+10", BrightnessCorrectionPolyline(10)));
+            PolylineFilters.Add(new PolylineFilter("Brightness-20", BrightnessCorrectionPolyline(-20)));
 
             // Contrast Enhancement
-            PolylineFilters["Contrast"] = new PolylineFilter("Contrast", ContrastEnhancementPolyline(4));
-            var fil = new PolylineFilter("Inversion", points);
+            PolylineFilters.Add(new PolylineFilter("Contrast", ContrastEnhancementPolyline(4)));
 
             // Gamma correction
             Filters["Gamma-0.25"] = new GammaFilter("Gamma", 0.25f);
@@ -57,7 +54,6 @@ namespace Pixl
 
             PolylineFiltersPanel.ItemsSource = PolylineFilters;
             FiltersPanel.ItemsSource = Filters;
-            
         }
         private void Load_Click(object sender, RoutedEventArgs e)
         {
@@ -149,8 +145,8 @@ namespace Pixl
             string filterName = (sender as Button).Content.ToString();
             if (filterName != null)
             {
-                Processor.Filter = Filters[filterName];
-                Processor.applyFilter(BitmapFiltered);
+                var filter = Filters[filterName];
+                FilterProcessor.applyFilter(BitmapFiltered, filter);
                 UpdateFilteredImage();
             }
         }
@@ -159,8 +155,8 @@ namespace Pixl
             string filterName = (sender as Button).Content.ToString();
             if (filterName != null)
             {
-                Processor.Filter = PolylineFilters[filterName];
-                Processor.applyFilter(BitmapFiltered);
+                var filter = PolylineFilters.FirstOrDefault(filter => filter.Name == filterName);
+                FilterProcessor.applyFilter(BitmapFiltered, filter);
                 UpdateFilteredImage();
             }
         }
@@ -169,9 +165,10 @@ namespace Pixl
             BitmapFiltered = new Bitmap(BitmapDefault);
             UpdateFilteredImage();
         }
-        private void Edit_Click(object sender, RoutedEventArgs e)
+        private void EditFilters_Click(object sender, RoutedEventArgs e)
         {
-            // TODO
+            var filterEditWindow = new FilterEditWindow(PolylineFilters);
+            filterEditWindow.Show();
         }
     }
 }

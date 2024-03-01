@@ -2,16 +2,11 @@
 
 namespace Pixl
 {
-    internal class FilterProcessor
+    internal static class FilterProcessor
     {
-        public IFilter? Filter { get; set; }
-        public FilterProcessor()
+        public static void applyFilter(Bitmap bitmapFiltered, IFilter filter)
         {
-            Filter = null;
-        }
-        public void applyFilter(Bitmap bitmapFiltered)
-        {
-            if (Filter == null || bitmapFiltered == null)
+            if (filter == null || bitmapFiltered == null)
             {
                 throw new Exception("Filter must be chosen");
             }
@@ -32,7 +27,7 @@ namespace Pixl
                 System.Runtime.InteropServices.Marshal.Copy(bmpPtr, rgbValues, 0, bytes);
 
 
-                Filter.Apply(rgbValues, bitmapFiltered.Width, bitmapFiltered.Height, bytes);
+                filter.Apply(rgbValues, bitmapFiltered.Width, bitmapFiltered.Height, bytes);
                 
                 System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, bmpPtr, bytes);
 

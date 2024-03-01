@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Pixl
 {
-    internal class PolylineFilter : IFilter
+    public class PolylineFilter : IFilter
     {
         public string Name { get; set; }
         public List<(int, int)> Points {  get; set; }

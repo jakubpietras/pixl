@@ -5,16 +5,34 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Pixl"
         mc:Ignorable="d"
-        Title="Filter View/Edit" 
-        Height="330" 
-        Width="276"
+        Title="Filter Editing" 
+        Height="400" 
+        Width="300"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
-        
         >
+    <Window.Resources>
+        <local:CoordsToPointsConverter x:Key="CoordsToPointsConverter"/>
+    </Window.Resources>
     <StackPanel>
-        <Border Margin="3" Background="Black" Width="256" Height="256"></Border>
+        <ComboBox Margin="5" Name="cmbFilters" SelectionChanged="cmbFilters_SelectionChanged">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <Label Content="{Binding Name}" />
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Canvas Width="256" Height="256" Margin="5" Name="Graph">
+            <!--<Polyline Points="{Binding Path=PolylineFilters, Converter={StaticResource CoordsToPointsConverter}}" Stroke="Black" StrokeThickness="2" FillRule="EvenOdd"/>-->
+            <!--<ItemsControl ItemsSource="{Binding PolylineFilters}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Polyline Points="{Binding Points, Converter={StaticResource CoordsToPointsConverter}}" Stroke="Black" StrokeThickness="2" FillRule="EvenOdd"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>-->
+        </Canvas>
         <Button Content="Save" Margin="5"/>
     </StackPanel>
 </Window>
