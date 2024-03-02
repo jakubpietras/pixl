@@ -11,6 +11,7 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
+        Background="DimGray"
         >
     <StackPanel>
         <ComboBox Margin="5" Name="cmbFilters" SelectionChanged="cmbFilters_SelectionChanged">
@@ -20,7 +21,8 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <Canvas Width="256" Height="256" Margin="5" Name="Graph">
+        <Label Name="PositionIndicator" Foreground="White"/>
+        <Canvas Width="256" Height="256" Margin="5" Name="Graph" MouseMove="Graph_OnMouseMove">
             
         </Canvas>
         <Button Content="Save" Margin="5"/>
