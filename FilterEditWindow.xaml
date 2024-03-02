@@ -12,9 +12,6 @@
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         >
-    <Window.Resources>
-        <local:CoordsToPointsConverter x:Key="CoordsToPointsConverter"/>
-    </Window.Resources>
     <StackPanel>
         <ComboBox Margin="5" Name="cmbFilters" SelectionChanged="cmbFilters_SelectionChanged">
             <ComboBox.ItemTemplate>
@@ -24,14 +21,7 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
         <Canvas Width="256" Height="256" Margin="5" Name="Graph">
-            <!--<Polyline Points="{Binding Path=PolylineFilters, Converter={StaticResource CoordsToPointsConverter}}" Stroke="Black" StrokeThickness="2" FillRule="EvenOdd"/>-->
-            <!--<ItemsControl ItemsSource="{Binding PolylineFilters}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Polyline Points="{Binding Points, Converter={StaticResource CoordsToPointsConverter}}" Stroke="Black" StrokeThickness="2" FillRule="EvenOdd"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>-->
+            
         </Canvas>
         <Button Content="Save" Margin="5"/>
     </StackPanel>

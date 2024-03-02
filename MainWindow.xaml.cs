@@ -15,6 +15,7 @@ using static System.Net.WebRequestMethods;
 using System.Windows.Shapes;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Point = System.Windows.Point;
 
 
 namespace Pixl
@@ -38,7 +39,12 @@ namespace Pixl
 
             // ----- Initial set of filters -----
             // Inversion
-            List<(int, int)> points = [(0, 255), (255, 0)];
+            List<Point> points = new List<Point>
+            {
+                new Point(0, 255),
+                new Point(255, 0)
+            };
+            
             PolylineFilters.Add(new PolylineFilter("Inversion", points));
 
             // Brightness correction
@@ -121,24 +127,52 @@ namespace Pixl
         {
             FilteredImage.Source = BitmapToBitmapImage(BitmapFiltered);
         }
-        private List<(int, int)> BrightnessCorrectionPolyline(int a)
+        private List<Point> BrightnessCorrectionPolyline(int a)
         {
             if (a > 0 && a <= 255)
-                return new List<(int, int)>([(0, a), (255 - a, 255), (255, 255)]);
+            {
+                return new List<Point>
+                {
+                    new Point(0, a),
+                    new Point(255 - a, 255),
+                    new Point(255, 255)
+                };
+            }
             if (a < 0 && a >= -255)
-                return new List<(int, int)>([(0, 0), (-a, 0), (255, 255 + a)]);
-            return new List<(int, int)>([(0, 0), (255, 255)]);
+            {
+                return new List<Point>
+                {
+                    new Point(0, 0),
+                    new Point(- a, 0),
+                    new Point(255, 255 + a)
+                };
+            }
+            return new List<Point>
+            {
+                new Point(0, 0),
+                new Point(255, 255)
+            };
         }
-        private List<(int, int)> ContrastEnhancementPolyline(int a)
+        private List<Point> ContrastEnhancementPolyline(int a)
         {
             if (a > 0)
             {
                 int clampLeft = (int)Math.Floor(0.5 * 255 - 0.5 * 255 / a);
                 int clampRight = (int)Math.Floor(0.5 * 255 + 0.5 * 255 / a);
 
-                return new List<(int, int)>([(0, 0), (clampLeft, 0), (clampRight, 255), (255, 255)]);
+                return new List<Point>
+                {
+                    new Point(0, 0),
+                    new Point(clampLeft, 0),
+                    new Point(clampRight, 255),
+                    new Point(255, 255)
+                };
             }
-            return new List<(int, int)>([(0, 0), (255, 255)]);
+            return new List<Point>
+            {
+                new Point(0, 0),
+                new Point(255, 255)
+            };
         }
         private void Filter_Click(object sender, RoutedEventArgs e)
         {

@@ -4,18 +4,20 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using Point = System.Windows.Point;
 
 namespace Pixl
 {
     public class PolylineFilter : IFilter
     {
         public string Name { get; set; }
-        public List<(int, int)> Points {  get; set; }
-        public PolylineFilter(string name, List<(int,int)> points) 
+        public List<Point> Points {  get; set; }
+        public PolylineFilter(string name, List<Point> points) 
         {
             Name = name;
-            Points = [.. points];
-            Points.Sort((x, y) => x.Item1.CompareTo(y.Item1)); 
+            Points = points;
+            Points.Sort((p1, p2) => p1.X.CompareTo(p2.X)); 
             // https://stackoverflow.com/questions/4668525/sort-listtupleint-int-in-place
         }
 
@@ -23,9 +25,19 @@ namespace Pixl
         {
             for (int counter = 0; counter < rgbValues.Length; counter++)
             {
-                if (Points.Exists(x => x.Item1 == rgbValues[counter]))
+                // If there is a point with a color value directly, find it
+                int index = -1;
+                for (int i = 0; i < Points.Count; i++)
                 {
-                    rgbValues[counter] = (byte)Points.Find(x => x.Item1 == rgbValues[counter]).Item2;
+                    if (Points[i].X == rgbValues[counter])
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index != -1)
+                {
+                    rgbValues[counter] = (byte)Points[index].Y;
                 }
                 else
                 {
@@ -34,11 +46,11 @@ namespace Pixl
 
                     // Slope of a function intersecting the right bound and the left bound (which
                     // is one unit to the left from the right bound)
-                    double segmentSlope = (Points[rightBound].Item2 - Points[rightBound - 1].Item2)
-                        / (Points[rightBound].Item1 - Points[rightBound - 1].Item1);
+                    double segmentSlope = (Points[rightBound].Y - Points[rightBound - 1].Y)
+                        / (Points[rightBound].X - Points[rightBound - 1].X);
 
                     // Intercept of the function calculated based on the slope and the right bound
-                    double segmentIntercept = Points[rightBound].Item2 - segmentSlope * Points[rightBound].Item1;
+                    double segmentIntercept = Points[rightBound].Y - segmentSlope * Points[rightBound].X;
 
                     // New value of the RGB value calculated as a value of the function determined
                     // above
@@ -49,32 +61,32 @@ namespace Pixl
 
         }
 
-        public static int FindIndex(double target, List<(int, int)> list, int start, int end)
+        public static int FindIndex(double target, List<Point> list, int start, int end)
         {
             // Using binary search to find two values which are bounds for the target value
             
             int mid = (int)Math.Floor((start + end) / 2.0);
 
-            if (target < list[mid].Item1)
+            if (target < list[mid].X)
             {
                 if (mid == 0)
                 {
                     throw new IndexOutOfRangeException();
                 }
-                if (target > list[mid - 1].Item1)
+                if (target > list[mid - 1].X)
                     return mid;
                 else
                 {
                     return FindIndex(target, list, start, mid - 1);
                 }
             }
-            if (target > list[mid].Item1)
+            if (target > list[mid].X)
             {
                 if (mid == list.Count - 1)
                 {
                     throw new IndexOutOfRangeException();
                 }
-                if (target < list[mid + 1].Item1)
+                if (target < list[mid + 1].X)
                     return mid + 1;
                 else
                 {
@@ -82,6 +94,11 @@ namespace Pixl
                 }
             }
             return -1;
+        }
+
+        private bool MatchPoint(Point p, int val)
+        {
+            return p.X == val;
         }
     }
 }
