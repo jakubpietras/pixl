@@ -29,13 +29,19 @@ namespace Pixl
         private Rectangle Background { get; set; }
         private Path XAxisPath { get; set; }
         private Path YAxisPath { get; set; }
+        private double PointWidth { get; set; }
+        private bool isDragging;
+        private Point clickPosition;
+        private TranslateTransform origin;
 
         public FilterEditWindow(ObservableCollection<PolylineFilter> polylineFilters)
         {
             InitializeComponent();
             PolylineFilters = polylineFilters;
             cmbFilters.ItemsSource = PolylineFilters;
+            //cmbFilters.Items.Add("New filter...");
             InitializeBackground();
+            PointWidth = 6f;
             DataContext = this;
         }
         private void cmbFilters_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -110,21 +116,23 @@ namespace Pixl
             graphPolyline.Points = pointsCollection;
             Graph.Children.Add(graphPolyline);
         }
-        private void DrawPoints(int width)
+        private void DrawPoints()
         {
-            double radius = width / 2.0;
+            double radius = PointWidth / 2.0;
             ItemsControl graphPoints = new ItemsControl();
             graphPoints.ItemsPanel = new ItemsPanelTemplate(new FrameworkElementFactory(typeof(Canvas)));
             foreach (var p in FilterPoints)
             {
                 Ellipse ellipse = new Ellipse
                 {
-                    Width = width,
-                    Height = width,
+                    Width = PointWidth,
+                    Height = PointWidth,
                     Fill = System.Windows.Media.Brushes.WhiteSmoke,
                     Stroke = System.Windows.Media.Brushes.WhiteSmoke
-
+                    
                 };
+                ellipse.MouseMove += Point_OnMouseMove;
+                ellipse.MouseRightButtonDown += Point_OnMouseRightButtonDown;
                 graphPoints.Items.Add(ellipse);
                 Canvas.SetLeft(ellipse, p.X - radius);
                 Canvas.SetTop(ellipse, 255 - p.Y - radius);
@@ -136,27 +144,91 @@ namespace Pixl
             Graph.Children.Clear();
             DrawBackground();
             DrawPolyline();
-            DrawPoints(6);
+            DrawPoints();
         }
         private void Graph_OnMouseMove(object sender, MouseEventArgs e)
         {
             Point p = e.GetPosition(Graph);
             PositionIndicator.Content = $"X: {Math.Floor(p.X)} Y: {255 - Math.Floor(p.Y)}";
         }
+
         private void Graph_OnMouseDown(object sender, MouseButtonEventArgs e)
         {
-            // Check if for a given x position, some point already exists
-            
-            // Add a point to collection
-            FilterPoints.Add(new Point(Math.Floor(e.GetPosition(Graph).X), Math.Floor(255 - e.GetPosition(Graph).Y)));
-            FilterPoints.Sort((p1, p2) => p1.X.CompareTo(p2.X));
-            
-            // Redraw points
-            DrawGraph();
+            Point mousePos = e.GetPosition(Graph);
+            if (AddPoint((int)Math.Floor(mousePos.X), (int)Math.Floor(255 - mousePos.Y)))
+            {
+                // Redraw points
+                DrawGraph();
+            }
         }
-        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+
+        private void Point_OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            Point mousePos = e.GetPosition(Graph);
+            if (RemovePoint((int)Math.Floor(mousePos.X)))
+            {
+                DrawGraph();
+            }
+        }
+        private void SaveButton_OnClick(object sender, RoutedEventArgs e)
         {
             SelectedFilter.Points = FilterPoints;
+        }
+        private void Point_OnMouseMove(object sender, MouseEventArgs e)
+        {
+            
+        }
+
+        
+        private bool AddPoint(int posX, int posY)
+        {
+            // Check if already exists
+            for (int i = 0; i < FilterPoints.Count(); i++)
+            {
+                if (FilterPoints[i].X == posX)
+                    return false;
+            }
+            FilterPoints.Add(new Point(posX, posY));
+            FilterPoints.Sort((p1, p2) => p1.X.CompareTo(p2.X));
+            return true;
+        }
+
+        private bool RemovePoint(int posX)
+        {
+            for (int i = 0; i < FilterPoints.Count(); i++)
+            {
+                if (posX == FilterPoints[i].X && posX != 0 && posX != 255)
+                {
+                    FilterPoints.RemoveAt(i);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+        {
+            var filterNameDialog = new FilterNameDialog();
+            if (filterNameDialog.ShowDialog().Value)
+            {
+                var name = filterNameDialog.Name;
+                var newFilter = new PolylineFilter(name, new List<Point>
+                {
+                    new Point(0, 0),
+                    new Point(255, 255)
+                });
+                PolylineFilters.Add(newFilter);
+                cmbFilters.SelectedItem = newFilter;
+                SelectedFilter = newFilter;
+            }
+        }
+
+        private void FilterEditWindow_OnDeactivated(object? sender, EventArgs e)
+        {
+            // https://stackoverflow.com/questions/20050426/wpf-always-on-top
+            Window window = (Window)sender;
+            window.Topmost = true;
         }
     }
 }

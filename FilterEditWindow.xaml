@@ -12,19 +12,24 @@
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         Background="DimGray"
+        Deactivated="FilterEditWindow_OnDeactivated"
         >
     <StackPanel>
-        <ComboBox Margin="5" Name="cmbFilters" SelectionChanged="cmbFilters_SelectionChanged">
-            <ComboBox.ItemTemplate>
-                <DataTemplate>
-                    <Label Content="{Binding Name}" />
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
+        <DockPanel Height="45">
+            <Button DockPanel.Dock="Left" Content="Add +" Margin="2" Padding="2" Height="30" Click="ButtonBase_OnClick"/>
+            <ComboBox DockPanel.Dock="Right" Margin="5" Name="cmbFilters" SelectionChanged="cmbFilters_SelectionChanged">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Label Content="{Binding Name}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </DockPanel>
+        
         <Label Name="PositionIndicator" Foreground="White"/>
-        <Canvas Width="256" Height="256" Margin="5" Name="Graph" MouseMove="Graph_OnMouseMove" MouseDown="Graph_OnMouseDown">
+        <Canvas Width="256" Height="256" Margin="5" Name="Graph" MouseMove="Graph_OnMouseMove" MouseLeftButtonDown="Graph_OnMouseDown">
             
         </Canvas>
-        <Button Content="Save" Margin="5" Click="ButtonBase_OnClick"/>
+        <Button Content="Save" Margin="5" Click="SaveButton_OnClick"/>
     </StackPanel>
 </Window>
