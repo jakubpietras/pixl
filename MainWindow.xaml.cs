@@ -1,31 +1,17 @@
-﻿using System.Text;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using Microsoft.Win32;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using static System.Net.WebRequestMethods;
-using System.Windows.Shapes;
 using System.Collections.ObjectModel;
-using System.Linq;
 using Point = System.Windows.Point;
-
 
 namespace Pixl
 {
     public partial class MainWindow : Window
     { 
-        BitmapImage? ImageDefault { get; set; }
-        BitmapImage? ImageFiltered { get; set; }
-        Bitmap? BitmapDefault { get; set; }
-        Bitmap? BitmapFiltered { get; set; }
+        WriteableBitmap? BitmapDefault { get; set; }
+        WriteableBitmap? BitmapFiltered { get; set; }
         Dictionary<string, IFilter> Filters;
         private ObservableCollection<PolylineFilter> PolylineFilters;
         public MainWindow()
@@ -75,16 +61,15 @@ namespace Pixl
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "PNG file (*.png)|*.png";
+            
+            // https://stackoverflow.com/questions/11212771/save-writeablebitmap-to-file-using-wpf
             if (saveFileDialog.ShowDialog() == true)
             {
-                // https://stackoverflow.com/questions/35804375/how-do-i-save-a-bitmapimage-from-memory-into-a-file-in-wpf-c
-                BitmapImage imageToSave = BitmapToBitmapImage(BitmapFiltered);
-                BitmapEncoder encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(imageToSave));
-
-                using (var fileStream = new System.IO.FileStream(saveFileDialog.FileName, System.IO.FileMode.Create))
+                using (FileStream fs = new FileStream(saveFileDialog.FileName, FileMode.Create))
                 {
-                    encoder.Save(fileStream);
+                    PngBitmapEncoder encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(BitmapFiltered));
+                    encoder.Save(fs);
                 }
             }
         }
@@ -99,33 +84,16 @@ namespace Pixl
             bitmapImg.BeginInit();
             bitmapImg.UriSource = new Uri(imagePath);
             bitmapImg.EndInit();
-            ImageDefault = bitmapImg;
 
             // Bitmap from the original image
-            BitmapDefault = new Bitmap(imagePath);
-            BitmapFiltered = new Bitmap(BitmapDefault);
-
-            // At first set both fields to the same image
-            OriginalImage.Source = FilteredImage.Source = bitmapImg;
-        }
-        private BitmapImage BitmapToBitmapImage(Bitmap bitmap)
-        {
-            // https://stackoverflow.com/questions/94456/load-a-wpf-bitmapimage-from-a-system-drawing-bitmap
-            BitmapImage bitmapImage = new BitmapImage();
-            using (MemoryStream memory = new MemoryStream())
-            {
-                bitmap.Save(memory, ImageFormat.Png);
-                memory.Position = 0;
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-            }
-            return bitmapImage;
+            BitmapDefault = new WriteableBitmap(bitmapImg);
+            BitmapFiltered = new WriteableBitmap(bitmapImg);
+            OriginalImage.Source = BitmapDefault;
+            FilteredImage.Source = BitmapFiltered;
         }
         private void UpdateFilteredImage()
         {
-            FilteredImage.Source = BitmapToBitmapImage(BitmapFiltered);
+            FilteredImage.Source = BitmapFiltered;
         }
         private List<Point> BrightnessCorrectionPolyline(int a)
         {
@@ -180,7 +148,7 @@ namespace Pixl
             if (filterName != null)
             {
                 var filter = Filters[filterName];
-                FilterProcessor.applyFilter(BitmapFiltered, filter);
+                filter.Apply(BitmapFiltered);
                 UpdateFilteredImage();
             }
         }
@@ -190,13 +158,13 @@ namespace Pixl
             if (filterName != null)
             {
                 var filter = PolylineFilters.FirstOrDefault(filter => filter.Name == filterName);
-                FilterProcessor.applyFilter(BitmapFiltered, filter);
+                filter.Apply(BitmapFiltered);
                 UpdateFilteredImage();
             }
         }
         private void Revert_Click(object sender, RoutedEventArgs e)
         {
-            BitmapFiltered = new Bitmap(BitmapDefault);
+            BitmapFiltered = new WriteableBitmap(BitmapDefault);
             UpdateFilteredImage();
         }
         private void EditFilters_Click(object sender, RoutedEventArgs e)

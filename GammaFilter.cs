@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Printing.IndexedProperties;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Windows;
+using System.Windows.Media.Imaging;
 
 namespace Pixl
 {
@@ -17,19 +12,38 @@ namespace Pixl
             Name = name;
             Gamma = gamma;
         }
-
-        public void Apply(byte[] rgbValues, int width, int height, int bytes)
+        public void Apply(WriteableBitmap bitmap)
         {
-            // byte[] rgbValuesTmp = new byte[bytes];
-            
-            for (int counter = 0; counter < rgbValues.Length; counter++)
-            {
-                double val = (double)rgbValues[counter] / 255;
-                double newVal = Math.Pow(val, Gamma);
-                rgbValues[counter] = (byte)(newVal * 255);
-            }
+            IntPtr pBackBuffer = bitmap.BackBuffer;
+            int pixelCount = bitmap.PixelHeight * bitmap.PixelWidth;
 
-            // rgbValuesTmp.CopyTo(rgbValues, 0);      
+            bitmap.Lock();
+            try
+            {
+                unsafe
+                {
+                    for (int counter = 0; counter < pixelCount; counter++)
+                    {
+                        IntPtr pPixel = pBackBuffer + counter * 4;
+                        var pColor = (byte*)pPixel;
+                        pColor[0] = ProcessColor(pColor[0]);
+                        pColor[1] = ProcessColor(pColor[1]);
+                        pColor[2] = ProcessColor(pColor[2]);
+                    }
+                }
+                bitmap.AddDirtyRect(new Int32Rect(0, 0, bitmap.PixelWidth, bitmap.PixelHeight));
+            }
+            finally
+            {
+                bitmap.Unlock();
+            }
+        }
+
+        private byte ProcessColor(byte color)
+        {
+            double val = (double)color / 255;
+            double newVal = Math.Pow(val, Gamma);
+            return (byte)(newVal * 255);
         }
     }
 }

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
+using System.Windows.Media.Imaging;
 using Point = System.Windows.Point;
 
 namespace Pixl
@@ -21,44 +16,63 @@ namespace Pixl
             // https://stackoverflow.com/questions/4668525/sort-listtupleint-int-in-place
         }
 
-        public void Apply(byte[] rgbValues, int width, int height, int bytes)
+        public void Apply(WriteableBitmap bitmap)
         {
-            for (int counter = 0; counter < rgbValues.Length; counter++)
+            bitmap.Lock();
+            try
             {
-                // If there is a point with a color value directly, find it
-                int index = -1;
-                for (int i = 0; i < Points.Count; i++)
+                IntPtr pBackBuffer = bitmap.BackBuffer;
+                int pixelCount = bitmap.PixelWidth * bitmap.PixelHeight;
+                unsafe
                 {
-                    if (Points[i].X == rgbValues[counter])
+                    for (int counter = 0; counter < pixelCount; counter++)
                     {
-                        index = i;
-                        break;
+                        byte* pPixel = (byte*)pBackBuffer + counter * 4; // Assuming BGRA
+                        pPixel[0] = ProcessColor(pPixel[0]);
+                        pPixel[1] = ProcessColor(pPixel[1]);
+                        pPixel[2] = ProcessColor(pPixel[2]);
                     }
                 }
-                if (index != -1)
+                bitmap.AddDirtyRect(new Int32Rect(0,0, bitmap.PixelWidth, bitmap.PixelHeight));
+            }
+            finally
+            {
+                bitmap.Unlock();
+            }
+        }
+
+        private byte ProcessColor(byte color)
+        {
+            // If there is a point with a color value directly, find it
+            int index = -1;
+            for (int i = 0; i < Points.Count; i++)
+            {
+                if (Points[i].X == color)
                 {
-                    rgbValues[counter] = (byte)Points[index].Y;
-                }
-                else
-                {
-                    // Index of a point from Points immediately to the right of the given RGB value
-                    int rightBound = FindIndex(rgbValues[counter], Points, 0, Points.Count - 1);
-
-                    // Slope of a function intersecting the right bound and the left bound (which
-                    // is one unit to the left from the right bound)
-                    double segmentSlope = (Points[rightBound].Y - Points[rightBound - 1].Y)
-                        / (Points[rightBound].X - Points[rightBound - 1].X);
-
-                    // Intercept of the function calculated based on the slope and the right bound
-                    double segmentIntercept = Points[rightBound].Y - segmentSlope * Points[rightBound].X;
-
-                    // New value of the RGB value calculated as a value of the function determined
-                    // above
-                    double newVal = (segmentSlope * rgbValues[counter]) + segmentIntercept;
-                    rgbValues[counter] = (byte)(newVal);
+                    index = i;
+                    break;
                 }
             }
+            if (index != -1)
+            {
+                return (byte)Points[index].Y;
+            }
 
+            // Index of a point from Points immediately to the right of the given RGB value
+            int rightBound = FindIndex(color, Points, 0, Points.Count - 1);
+
+            // Slope of a function intersecting the right bound and the left bound (which
+            // is one unit to the left from the right bound)
+            double segmentSlope = (Points[rightBound].Y - Points[rightBound - 1].Y)
+                                  / (Points[rightBound].X - Points[rightBound - 1].X);
+
+            // Intercept of the function calculated based on the slope and the right bound
+            double segmentIntercept = Points[rightBound].Y - segmentSlope * Points[rightBound].X;
+
+            // New value of the RGB value calculated as a value of the function determined
+            // above
+            double newVal = segmentSlope * color + segmentIntercept;
+            return (byte) newVal;
         }
 
         public static int FindIndex(double target, List<Point> list, int start, int end)
@@ -75,10 +89,7 @@ namespace Pixl
                 }
                 if (target > list[mid - 1].X)
                     return mid;
-                else
-                {
-                    return FindIndex(target, list, start, mid - 1);
-                }
+                return FindIndex(target, list, start, mid - 1);
             }
             if (target > list[mid].X)
             {
@@ -88,17 +99,9 @@ namespace Pixl
                 }
                 if (target < list[mid + 1].X)
                     return mid + 1;
-                else
-                {
-                    return FindIndex(target, list, mid + 1, end);
-                }
+                return FindIndex(target, list, mid + 1, end);
             }
             return -1;
-        }
-
-        private bool MatchPoint(Point p, int val)
-        {
-            return p.X == val;
         }
     }
 }
