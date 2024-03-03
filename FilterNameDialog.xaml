@@ -8,7 +8,7 @@
         Title="FilterNameDialog" 
         Height="100" 
         Width="200"
-        WindowStartupLocation="CenterOwner"
+        WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         WindowStyle="None"
