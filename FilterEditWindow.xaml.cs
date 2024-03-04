@@ -30,11 +30,9 @@ namespace Pixl
         private Path XAxisPath { get; set; }
         private Path YAxisPath { get; set; }
         private double PointWidth { get; set; }
-        private bool isCaptured;
-        Ellipse source;
-        int pointPosX = 0, pointPosY = 0;
-        
-        
+        UIElement dragObject { get; set; }
+        Point offset;
+        int oldPosX { get; set; }
 
         public FilterEditWindow(ObservableCollection<PolylineFilter> polylineFilters)
         {
@@ -44,7 +42,6 @@ namespace Pixl
             //cmbFilters.Items.Add("New filter...");
             InitializeBackground();
             PointWidth = 6f;
-            source = null;
             DataContext = this;
         }
         private void cmbFilters_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -134,10 +131,7 @@ namespace Pixl
                     Stroke = System.Windows.Media.Brushes.WhiteSmoke
                     
                 };
-                ellipse.MouseMove += Point_OnMouseMove;
-                ellipse.MouseRightButtonDown += Point_OnMouseRightButtonDown;
-                ellipse.MouseLeftButtonDown += Point_OnMouseLeftButtonDown;
-                ellipse.MouseLeftButtonUp += Point_OnMouseLeftButtonUp;
+                ellipse.PreviewMouseDown += Point_PreviewMouseDown;
                 graphPoints.Items.Add(ellipse);
                 Canvas.SetLeft(ellipse, p.X - radius);
                 Canvas.SetTop(ellipse, 255 - p.Y - radius);
@@ -152,13 +146,27 @@ namespace Pixl
             DrawPolyline();
             DrawPoints();
         }
-        private void Graph_OnMouseMove(object sender, MouseEventArgs e)
+        private void Graph_PreviewMouseMove(object sender, MouseEventArgs e)
         {
             Point p = e.GetPosition(Graph);
             PositionIndicator.Content = $"X: {Math.Floor(p.X)} Y: {255 - Math.Floor(p.Y)}";
-        }
 
-        private void Graph_OnMouseDown(object sender, MouseButtonEventArgs e)
+            if (dragObject == null)
+                return;
+            var position = e.GetPosition(sender as IInputElement);
+            Canvas.SetTop(dragObject, Math.Floor(position.Y - offset.Y));
+            Canvas.SetLeft(dragObject, Math.Floor(position.X - offset.X));
+        }
+        private void Point_PreviewMouseDown(object sender, MouseEventArgs e)
+        {
+            dragObject = sender as UIElement;
+            offset = e.GetPosition(Graph);
+            oldPosX = (int)Math.Floor(offset.X);
+            offset.X -= Canvas.GetLeft(dragObject);
+            offset.Y -= Canvas.GetTop(dragObject);
+            Graph.CaptureMouse();
+        }
+        private void Graph_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             Point mousePos = e.GetPosition(Graph);
             if (AddPoint((int)Math.Floor(mousePos.X), (int)Math.Floor(255 - mousePos.Y)))
@@ -176,30 +184,8 @@ namespace Pixl
                 DrawGraph();
             }
         }
+        
 
-        private void Point_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            source = sender as Ellipse;
-            Mouse.Capture(source);
-            isCaptured = true;
-            pointPosX = (int)(Math.Floor(Canvas.GetLeft(source)) + PointWidth / 2);
-            pointPosY = (int)(Math.Floor(Canvas.GetTop(source)) + PointWidth / 2);
-        }
-        private void Point_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            Mouse.Capture(null);
-            isCaptured = false;
-        }
-        private void Point_OnMouseMove(object sender, MouseEventArgs e)
-        {
-            if(isCaptured)
-            {
-                int x = (int)Math.Floor(e.GetPosition(Graph).X);
-                int y = (int)Math.Floor(e.GetPosition(Graph).Y);
-                UpdatePoint(pointPosX, x, y);
-                DrawGraph();
-            }
-        }
 
         private void SaveButton_OnClick(object sender, RoutedEventArgs e)
         {
@@ -256,27 +242,51 @@ namespace Pixl
             window.Topmost = true;
         }
 
-        private void UpdatePoint(int oldX, int newX, int newY)
-        {
-            Point point = FilterPoints.FirstOrDefault(p => p.X == oldX);
-            int pointIndex = FilterPoints.IndexOf(point);
+        
 
+        private void UpdatePoint(Point point, int newX, int newY)
+        {
+
+            int pointIndex = FilterPoints.IndexOf(point);
             if (pointIndex != -1)
             {
-                if (oldX == 0 || oldX == 255)
+                if (point.X == 0)
                 {
-                    point.Y = newY;
+                    FilterPoints.RemoveAt(FilterPoints.IndexOf(point));
+                    AddPoint(0, 255 - newY);
+                    return;
                 }
-                else if (newX <= FilterPoints[pointIndex - 1].X || newX >= FilterPoints[pointIndex + 1].X)
+                if (oldPosX == 255)
                 {
-                    FilterPoints.Remove(point);
+                    FilterPoints.RemoveAt(FilterPoints.IndexOf(point));
+                    AddPoint(255, 255 - newY);
+                    return;
                 }
-                else
+                if (newX <= FilterPoints[pointIndex - 1].X || newX >= FilterPoints[pointIndex + 1].X)
                 {
-                    point.X = newX;
-                    point.Y = newY;
+                    RemovePoint(oldPosX);
+                    return;
                 }
+                    RemovePoint(oldPosX);
+                    AddPoint(newX, 255 - newY);
+                
             }
+        }
+
+        private void Graph_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (dragObject != null)
+            {
+                int posX = (int)Math.Floor(e.GetPosition(Graph).X),
+                    posY = (int)Math.Floor(e.GetPosition(Graph).Y);
+                Point point = FilterPoints.FirstOrDefault(p => p.X == oldPosX);
+                UpdatePoint(point, posX, posY);
+                dragObject = null;
+                Graph.ReleaseMouseCapture();
+                DrawGraph();
+
+            }
+
         }
     }
 }

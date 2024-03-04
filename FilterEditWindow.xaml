@@ -26,7 +26,7 @@
         </StackPanel>
         
         <Label Name="PositionIndicator" Foreground="White" HorizontalAlignment="Center" Content="X:0 Y:0"/>
-        <Canvas Width="256" Height="256" Margin="5" Name="Graph" MouseMove="Graph_OnMouseMove" MouseLeftButtonDown="Graph_OnMouseDown">
+        <Canvas Width="256" Height="256" Margin="5" Name="Graph" PreviewMouseMove="Graph_PreviewMouseMove" MouseLeftButtonDown="Graph_MouseLeftButtonDown" PreviewMouseLeftButtonUp="Graph_PreviewMouseLeftButtonUp" MouseRightButtonDown="Point_OnMouseRightButtonDown">
             
         </Canvas>
         <WrapPanel HorizontalAlignment="Center">
