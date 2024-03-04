@@ -13,20 +13,24 @@
         </Menu>
         <Border BorderBrush="#494949" BorderThickness="1">
             <StackPanel DockPanel.Dock="Left" Margin="5">
-                <ItemsControl Name="PolylineFiltersPanel" ItemsSource="{Binding PolylineFilters}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button Content="{Binding Name}" Click="PolylineFilter_Click" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <ItemsControl Name="FiltersPanel">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button Content="{Binding Key}" Click="Filter_Click" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                <GroupBox Header="Function Filters" Foreground="White">
+                    <ItemsControl Name="PolylineFiltersPanel" ItemsSource="{Binding PolylineFilters}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding Name}" Click="PolylineFilter_Click" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </GroupBox>
+                <GroupBox Header="Other Filters" Foreground="White">
+                    <ItemsControl Name="FiltersPanel">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding Key}" Click="Filter_Click" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </GroupBox>
                 <Separator />
                 <Button Content="Revert" Click="Revert_Click" />
             </StackPanel>

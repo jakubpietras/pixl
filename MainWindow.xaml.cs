@@ -43,6 +43,22 @@ namespace Pixl
             // Gamma correction
             Filters["Gamma-0.25"] = new GammaFilter("Gamma", 0.25f);
             Filters["Gamma-2"] = new GammaFilter("Gamma", 2f);
+            
+            // Blur
+            Filters["Blur4"] = new ConvolutionFilter("Blur4",3, [1, 1, 1, 1, 1, 1, 1, 1, 1]);
+            Filters["Blur9"] = new ConvolutionFilter("Blur9",5, Enumerable.Repeat(1, 5 * 5).ToArray());
+
+            // Sharpen
+            int a = 1, b = 5, s = b - 4 * a;
+            Filters["Sharpen"] = new ConvolutionFilter("Sharpen", 3, [0, -a / s, 0, -a / s, b / s, -a / s, 0, -a / s, 0]);
+
+            // Diagonal edge detection
+            Filters["Edge"] = new ConvolutionFilter("Edge", 3, [0, -1, 0, -1, 4, -1, 0, -1, 0], 1);
+
+            // Emboss
+            Filters["Emboss"] = new ConvolutionFilter("Emboss", 3, [-1, 0, 1, -1, 1, 1, -1, 0, 1]);
+            Filters["Emboss2"] = new ConvolutionFilter("Emboss2", 3, [-1, -1, -1, 0, 1, 0, 1, 1, 1]);
+            
 
             PolylineFiltersPanel.ItemsSource = PolylineFilters;
             FiltersPanel.ItemsSource = Filters;
@@ -50,7 +66,7 @@ namespace Pixl
         private void Load_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Image files (*.jpg;*.jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
+            openFileDialog.Filter = "Image files (*.jpg;*.jpeg;*.png;*.bmp;*.tiff)|*.jpg;*.jpeg;*.png;*.bmp;*.tiff";
             if (openFileDialog.ShowDialog() == true)
             {
                 string imagePath = openFileDialog.FileName;

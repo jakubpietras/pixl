@@ -13,7 +13,6 @@ namespace Pixl
             Name = name;
             Points = points;
             Points.Sort((p1, p2) => p1.X.CompareTo(p2.X)); 
-            // https://stackoverflow.com/questions/4668525/sort-listtupleint-int-in-place
         }
 
         public void Apply(WriteableBitmap bitmap)
