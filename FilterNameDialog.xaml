@@ -11,7 +11,6 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
-        WindowStyle="None"
         BorderBrush="DarkGray"
         BorderThickness="2"
         Foreground="White"

@@ -164,8 +164,11 @@ namespace Pixl
             if (filterName != null)
             {
                 var filter = Filters[filterName];
-                filter.Apply(BitmapFiltered);
-                UpdateFilteredImage();
+                if (BitmapFiltered != null)
+                {
+                    filter.Apply(BitmapFiltered);
+                    UpdateFilteredImage();
+                }
             }
         }
         private void PolylineFilter_Click(object sender, RoutedEventArgs e)
@@ -174,14 +177,20 @@ namespace Pixl
             if (filterName != null)
             {
                 var filter = PolylineFilters.FirstOrDefault(filter => filter.Name == filterName);
-                filter.Apply(BitmapFiltered);
-                UpdateFilteredImage();
+                if (filter != null && BitmapFiltered != null)
+                {
+                    filter.Apply(BitmapFiltered);
+                    UpdateFilteredImage();
+                }
             }
         }
         private void Revert_Click(object sender, RoutedEventArgs e)
         {
-            BitmapFiltered = new WriteableBitmap(BitmapDefault);
-            UpdateFilteredImage();
+            if (BitmapDefault != null)
+            {
+                BitmapFiltered = new WriteableBitmap(BitmapDefault);
+                UpdateFilteredImage();
+            }
         }
         private void EditFilters_Click(object sender, RoutedEventArgs e)
         {

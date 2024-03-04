@@ -15,8 +15,7 @@
         Deactivated="FilterEditWindow_OnDeactivated"
         >
     <StackPanel>
-        <DockPanel Height="45">
-            <Button DockPanel.Dock="Left" Content="Add +" Margin="2" Padding="2" Height="30" Click="ButtonBase_OnClick"/>
+        <StackPanel Orientation="Vertical">
             <ComboBox DockPanel.Dock="Right" Margin="5" Name="cmbFilters" SelectionChanged="cmbFilters_SelectionChanged">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
@@ -24,12 +23,16 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-        </DockPanel>
+        </StackPanel>
         
-        <Label Name="PositionIndicator" Foreground="White"/>
+        <Label Name="PositionIndicator" Foreground="White" HorizontalAlignment="Center" Content="X:0 Y:0"/>
         <Canvas Width="256" Height="256" Margin="5" Name="Graph" MouseMove="Graph_OnMouseMove" MouseLeftButtonDown="Graph_OnMouseDown">
             
         </Canvas>
-        <Button Content="Save" Margin="5" Click="SaveButton_OnClick"/>
+        <WrapPanel HorizontalAlignment="Center">
+            <Button Content="Save" Margin="5" Width="100" Click="SaveButton_OnClick"/>
+            <Button DockPanel.Dock="Left" Content="Add new" Margin="5" Width="100" Click="ButtonBase_OnClick"/>
+        </WrapPanel>
+        
     </StackPanel>
 </Window>

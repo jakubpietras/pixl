@@ -30,9 +30,11 @@ namespace Pixl
         private Path XAxisPath { get; set; }
         private Path YAxisPath { get; set; }
         private double PointWidth { get; set; }
-        private bool isDragging;
-        private Point clickPosition;
-        private TranslateTransform origin;
+        private bool isCaptured;
+        Ellipse source;
+        int pointPosX = 0, pointPosY = 0;
+        
+        
 
         public FilterEditWindow(ObservableCollection<PolylineFilter> polylineFilters)
         {
@@ -42,6 +44,7 @@ namespace Pixl
             //cmbFilters.Items.Add("New filter...");
             InitializeBackground();
             PointWidth = 6f;
+            source = null;
             DataContext = this;
         }
         private void cmbFilters_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -133,12 +136,15 @@ namespace Pixl
                 };
                 ellipse.MouseMove += Point_OnMouseMove;
                 ellipse.MouseRightButtonDown += Point_OnMouseRightButtonDown;
+                ellipse.MouseLeftButtonDown += Point_OnMouseLeftButtonDown;
+                ellipse.MouseLeftButtonUp += Point_OnMouseLeftButtonUp;
                 graphPoints.Items.Add(ellipse);
                 Canvas.SetLeft(ellipse, p.X - radius);
                 Canvas.SetTop(ellipse, 255 - p.Y - radius);
             }
             Graph.Children.Add(graphPoints);
         }
+
         private void DrawGraph()
         {
             Graph.Children.Clear();
@@ -170,16 +176,35 @@ namespace Pixl
                 DrawGraph();
             }
         }
+
+        private void Point_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            source = sender as Ellipse;
+            Mouse.Capture(source);
+            isCaptured = true;
+            pointPosX = (int)(Math.Floor(Canvas.GetLeft(source)) + PointWidth / 2);
+            pointPosY = (int)(Math.Floor(Canvas.GetTop(source)) + PointWidth / 2);
+        }
+        private void Point_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Mouse.Capture(null);
+            isCaptured = false;
+        }
+        private void Point_OnMouseMove(object sender, MouseEventArgs e)
+        {
+            if(isCaptured)
+            {
+                int x = (int)Math.Floor(e.GetPosition(Graph).X);
+                int y = (int)Math.Floor(e.GetPosition(Graph).Y);
+                UpdatePoint(pointPosX, x, y);
+                DrawGraph();
+            }
+        }
+
         private void SaveButton_OnClick(object sender, RoutedEventArgs e)
         {
             SelectedFilter.Points = FilterPoints;
         }
-        private void Point_OnMouseMove(object sender, MouseEventArgs e)
-        {
-            
-        }
-
-        
         private bool AddPoint(int posX, int posY)
         {
             // Check if already exists
@@ -229,6 +254,29 @@ namespace Pixl
             // https://stackoverflow.com/questions/20050426/wpf-always-on-top
             Window window = (Window)sender;
             window.Topmost = true;
+        }
+
+        private void UpdatePoint(int oldX, int newX, int newY)
+        {
+            Point point = FilterPoints.FirstOrDefault(p => p.X == oldX);
+            int pointIndex = FilterPoints.IndexOf(point);
+
+            if (pointIndex != -1)
+            {
+                if (oldX == 0 || oldX == 255)
+                {
+                    point.Y = newY;
+                }
+                else if (newX <= FilterPoints[pointIndex - 1].X || newX >= FilterPoints[pointIndex + 1].X)
+                {
+                    FilterPoints.Remove(point);
+                }
+                else
+                {
+                    point.X = newX;
+                    point.Y = newY;
+                }
+            }
         }
     }
 }
