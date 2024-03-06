@@ -12,28 +12,30 @@
             <MenuItem Header="About" Click="About_Click"/>
         </Menu>
         <Border Background="DimGray">
-            <StackPanel DockPanel.Dock="Left" Margin="5">
-                <GroupBox Header="Function Filters" Foreground="White">
-                    <ItemsControl Name="PolylineFiltersPanel" ItemsSource="{Binding PolylineFilters}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button Content="{Binding Name}" Click="PolylineFilter_Click" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </GroupBox>
-                <GroupBox Header="Other Filters" Foreground="White">
-                    <ItemsControl Name="FiltersPanel">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button Content="{Binding Key}" Click="Filter_Click" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </GroupBox>
-                <Separator />
-                <Button Content="Revert" Click="Revert_Click" />
-            </StackPanel>
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" >
+                <StackPanel DockPanel.Dock="Left" Margin="5">
+                    <GroupBox Header="Function Filters" Foreground="White">
+                        <ItemsControl Name="PolylineFiltersPanel" ItemsSource="{Binding PolylineFilters}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding Name}" Click="PolylineFilter_Click" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </GroupBox>
+                    <GroupBox Header="Other Filters" Foreground="White">
+                        <ItemsControl Name="FiltersPanel">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding Key}" Click="Filter_Click" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </GroupBox>
+                    <Separator />
+                    <Button Content="Revert" Click="Revert_Click" />
+                </StackPanel>
+            </ScrollViewer>
         </Border>
             <Grid DockPanel.Dock="Right" Margin="5">
                 <Grid.ColumnDefinitions>

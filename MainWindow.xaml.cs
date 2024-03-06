@@ -34,19 +34,22 @@ namespace Pixl
             PolylineFilters.Add(new PolylineFilter("Inversion", points));
 
             // Brightness correction
-            PolylineFilters.Add(new PolylineFilter("Brightness+10", BrightnessCorrectionPolyline(10)));
-            PolylineFilters.Add(new PolylineFilter("Brightness-20", BrightnessCorrectionPolyline(-20)));
+            PolylineFilters.Add(new PolylineFilter("Brightness +50", BrightnessCorrectionPolyline(50)));
+            PolylineFilters.Add(new PolylineFilter("Brightness -50", BrightnessCorrectionPolyline(-50)));
 
             // Contrast Enhancement
             PolylineFilters.Add(new PolylineFilter("Contrast", ContrastEnhancementPolyline(4)));
 
             // Gamma correction
-            Filters["Gamma-0.25"] = new GammaFilter("Gamma", 0.25f);
-            Filters["Gamma-2"] = new GammaFilter("Gamma", 2f);
+            Filters["Gamma-0.25"] = new GammaFilter("Gamma-0.25", 0.25f);
+            Filters["Gamma-2"] = new GammaFilter("Gamma-2", 2f);
             
             // Blur
-            Filters["Blur4"] = new ConvolutionFilter("Blur4",3, [1, 1, 1, 1, 1, 1, 1, 1, 1]);
-            Filters["Blur9"] = new ConvolutionFilter("Blur9",5, Enumerable.Repeat(1, 5 * 5).ToArray());
+            Filters["Blur 4x4"] = new ConvolutionFilter("Blur 4x4", 3, [1, 1, 1, 1, 1, 1, 1, 1, 1]);
+            Filters["Blur 5x5"] = new ConvolutionFilter("Blur 5x5", 5, Enumerable.Repeat(1, 5 * 5).ToArray());
+
+            // Gaussian blur
+            Filters["Gaussian sm."] = new ConvolutionFilter("Gaussian sm.", 3, [0, 1, 0, 1, 4, 1, 0, 1, 0]);
 
             // Sharpen
             int a = 1, b = 5, s = b - 4 * a;
@@ -56,9 +59,10 @@ namespace Pixl
             Filters["Edge"] = new ConvolutionFilter("Edge", 3, [0, -1, 0, -1, 4, -1, 0, -1, 0], 1);
 
             // Emboss
-            Filters["Emboss"] = new ConvolutionFilter("Emboss", 3, [-1, 0, 1, -1, 1, 1, -1, 0, 1]);
-            Filters["Emboss2"] = new ConvolutionFilter("Emboss2", 3, [-1, -1, -1, 0, 1, 0, 1, 1, 1]);
-            
+            Filters["E-Emboss"] = new ConvolutionFilter("Emboss", 3, [-1, 0, 1, -1, 1, 1, -1, 0, 1]);
+            Filters["S-Emboss"] = new ConvolutionFilter("Emboss2", 3, [-1, -1, -1, 0, 1, 0, 1, 1, 1]);
+            Filters["SE-Emboss"] = new ConvolutionFilter("Emboss2", 3, [-1, -1, 0, -1, 1, 1, 0, 1, 1]);
+
 
             PolylineFiltersPanel.ItemsSource = PolylineFilters;
             FiltersPanel.ItemsSource = Filters;
