@@ -4,11 +4,11 @@
         Title="PIXL" Height="450" Width="800">
     <DockPanel Background="DimGray">
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="File">
-                <MenuItem Header="Load..." Click="Load_Click"/>
-                <MenuItem Header="Save..." Click="Save_Click"/>
+            <MenuItem Header="_File">
+                <MenuItem Header="_Load..." Click="Load_Click"/>
+                <MenuItem Header="_Save..." Click="Save_Click"/>
             </MenuItem>
-            <MenuItem Header="Edit filters" Click="EditFilters_Click"/>
+            <MenuItem Header="_Edit filters" Click="EditFilters_Click"/>
             <MenuItem Header="About" Click="About_Click"/>
         </Menu>
         <Border Background="DimGray">

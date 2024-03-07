@@ -5,6 +5,7 @@ using Microsoft.Win32;
 using System.IO;
 using System.Collections.ObjectModel;
 using Point = System.Windows.Point;
+using System.IO.MemoryMappedFiles;
 
 namespace Pixl
 {
@@ -199,6 +200,7 @@ namespace Pixl
         private void EditFilters_Click(object sender, RoutedEventArgs e)
         {
             var filterEditWindow = new FilterEditWindow(PolylineFilters);
+            filterEditWindow.Owner = this;
             filterEditWindow.Show();
         }
     }

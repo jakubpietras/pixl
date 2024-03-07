@@ -131,7 +131,7 @@ namespace Pixl
                     Stroke = System.Windows.Media.Brushes.WhiteSmoke
                     
                 };
-                ellipse.PreviewMouseDown += Point_PreviewMouseDown;
+                ellipse.PreviewMouseLeftButtonDown += Point_PreviewMouseLeftButtonDown;
                 graphPoints.Items.Add(ellipse);
                 Canvas.SetLeft(ellipse, p.X - radius);
                 Canvas.SetTop(ellipse, 255 - p.Y - radius);
@@ -157,7 +157,7 @@ namespace Pixl
             Canvas.SetTop(dragObject, Math.Floor(position.Y - offset.Y));
             Canvas.SetLeft(dragObject, Math.Floor(position.X - offset.X));
         }
-        private void Point_PreviewMouseDown(object sender, MouseEventArgs e)
+        private void Point_PreviewMouseLeftButtonDown(object sender, MouseEventArgs e)
         {
             dragObject = sender as UIElement;
             offset = e.GetPosition(Graph);
@@ -221,6 +221,7 @@ namespace Pixl
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
             var filterNameDialog = new FilterNameDialog();
+            filterNameDialog.Owner = this;
             if (filterNameDialog.ShowDialog().Value)
             {
                 var name = filterNameDialog.Name;

@@ -5,9 +5,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:Pixl"
         mc:Ignorable="d"
-        Title="FilterNameDialog" 
-        Height="100" 
-        Width="200"
+        Title="New filter" 
+        Height="150" 
+        Width="250"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
@@ -22,11 +22,11 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Label Grid.Row="0" Content="Enter a name for the new function:" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White"/>
-        <TextBox Name="NameField" Grid.Row="1" Margin="2" Background="Gray" Foreground="White"/>
+        <Label Grid.Row="0" Content="Enter a name for the new function filter:" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White"/>
+        <TextBox Name="NameField" Grid.Row="1" Margin="2" Background="Gray" Foreground="White" MaxLength="20"/>
         <WrapPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Button Content="Submit" Margin="2" Click="SubmitButton_OnClick"/>
-            <Button Content="Cancel" Margin="2" Click="CancelButton_OnClick"/>
+            <Button Content="Submit" Margin="2" Padding="4" Click="SubmitButton_OnClick"/>
+            <Button Content="Cancel" Margin="2" Padding="4" Click="CancelButton_OnClick"/>
         </WrapPanel>
     </Grid>
 </Window>
