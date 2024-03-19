@@ -203,5 +203,12 @@ namespace Pixl
             filterEditWindow.Owner = this;
             filterEditWindow.Show();
         }
+
+        private void Dithering_Click(object sender, RoutedEventArgs e)
+        {
+            var ditherWindow = new DitheringWindow();
+            ditherWindow.Owner = this;
+            ditherWindow.Show();
+        }
     }
 }

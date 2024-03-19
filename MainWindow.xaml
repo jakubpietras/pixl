@@ -32,6 +32,12 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </GroupBox>
+                    <GroupBox Header="Color depth options" Foreground="White">
+                        <StackPanel>
+                            <Button Content="Dithering" Click="Dithering_Click" />
+                            <Button Content="Quantization" />
+                        </StackPanel>
+                    </GroupBox>
                     <Separator />
                     <Button Content="Revert" Click="Revert_Click" />
                 </StackPanel>

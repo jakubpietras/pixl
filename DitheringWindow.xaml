@@ -1,0 +1,52 @@
+﻿<Window x:Class="Pixl.DitheringWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Pixl"
+        mc:Ignorable="d"
+                Title="Filter Editing" 
+        Height="320" 
+        Width="300"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="DimGray"
+        >
+    <StackPanel>
+        <TabControl Background="DimGray">
+            <TabItem Header="Color">
+                <StackPanel Background="DimGray">
+                    <DockPanel VerticalAlignment="Center" Margin="10">
+                        <Label DockPanel.Dock="Left" Content="Red levels" Foreground="White"/>
+                        <TextBox Text="{Binding ElementName=sliderRed, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" Width="40"/>
+                        <Slider Minimum="2" Maximum="256" TickFrequency="1"  IsSnapToTickEnabled="True" Name="sliderRed" />
+                    </DockPanel>
+                    <DockPanel VerticalAlignment="Center" Margin="10">
+                        <Label DockPanel.Dock="Left" Content="Green levels" Foreground="White"/>
+                        <TextBox Text="{Binding ElementName=sliderGreen, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" Width="40"/>
+                        <Slider Minimum="2" Maximum="256" TickFrequency="1" IsSnapToTickEnabled="True" Name="sliderGreen"/>
+                    </DockPanel>
+                    <DockPanel VerticalAlignment="Center" Margin="10">
+                        <Label DockPanel.Dock="Left" Content="Blue levels" Foreground="White"/>
+                        <TextBox Text="{Binding ElementName=sliderBlue, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" Width="40"/>
+                        <Slider Minimum="2" Maximum="256" TickFrequency="1" IsSnapToTickEnabled="True" Name="sliderBlue"/>
+                    </DockPanel>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Grayscale">
+                <StackPanel Background="DimGray">
+                    <DockPanel VerticalAlignment="Center" Margin="10">
+                        <Label DockPanel.Dock="Left" Content="Gray levels" Foreground="White"/>
+                        <TextBox Text="{Binding ElementName=sliderGray, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" Width="40"/>
+                        <Slider Minimum="2" Maximum="256" TickFrequency="1" IsSnapToTickEnabled="True" Name="sliderGray"/>
+                    </DockPanel>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+        <Label Content="Dithering method:" Foreground="White" FontWeight="Bold"/>
+        <ComboBox Name="cmbKernel" Margin="10">
+
+        </ComboBox>
+        <Button Content="Apply" Margin="10" Width="100" Click="Apply_Click"/>
+    </StackPanel>
+</Window>
