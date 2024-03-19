@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Pixl
 {
@@ -53,31 +55,88 @@ namespace Pixl
         private void Apply_Click(object sender, RoutedEventArgs e)
         {
             TabItem ti = DitherModeTab.SelectedItem as TabItem;
-            if (ti != null)
+            DitheringFilter df = cmbFilters.SelectedItem as DitheringFilter;
+            if (ti != null && df != null)
             {
                 if (ti.Name == "Color")
                 {
-                    MessageBox.Show("Color dither!", "Hi");
-                    ColorDither();
+                    ColorDither(df);
                 }
                 else if (ti.Name == "Grayscale")
                 {
-                    MessageBox.Show("Gray dither!", "Hi");
-                    GrayscaleDither();
+                    GrayscaleDither(df);
                 }
             }
             DialogResult = true;
             Close();
         }
 
-        private void GrayscaleDither()
+        private void GrayscaleDither(DitheringFilter df)
+        {
+            WriteableBitmap result = new WriteableBitmap(Bitmap);
+
+            List<int> grayValues = GenerateValues((int)sliderGray.Value);
+            Bitmap.Lock();
+            result.Lock();
+            try
+            {
+                IntPtr pBackBuffer = Bitmap.BackBuffer;
+                IntPtr pResultBackBuffer = result.BackBuffer;
+                int stride = Bitmap.BackBufferStride;
+
+                int pixelCount = Bitmap.PixelWidth * Bitmap.PixelHeight;
+
+                for (int column = 0; column < Bitmap.PixelHeight; column++)
+                {
+                    for (int row = 0; row < Bitmap.PixelWidth; row++)
+                    {
+                        int span = (int)Math.Floor(df.Size / 2.0);
+
+                        unsafe
+                        {
+                            byte* pPixel = (byte*)pBackBuffer + column * stride + row * 4; // Assuming BGRA
+                            int gray = (int)(0.2126 * pPixel[2] + 0.7152 * pPixel[1] + 0.0722 * pPixel[0]);
+                            int approx = grayValues.Aggregate((x, y) => Math.Abs(x - gray) < Math.Abs(y - gray) ? x : y);
+
+                            // Drawing a pixel
+                            byte* pResultPixel = (byte*)(pResultBackBuffer + column * stride + row * 4);
+                            pResultPixel[0] = (byte)approx;
+                            pResultPixel[1] = (byte)approx;
+                            pResultPixel[2] = (byte)approx;
+                        }
+                    }
+                }
+                Bitmap.WritePixels(new Int32Rect(0, 0, Bitmap.PixelWidth, Bitmap.PixelHeight), result.BackBuffer, stride * Bitmap.PixelHeight, stride);
+            }
+            finally
+            {
+                Bitmap.Unlock();
+                result.Unlock();
+            }
+        }
+        private void ColorDither(DitheringFilter df)
         {
 
         }
 
-        private void ColorDither()
+        private List<int> GenerateValues(int levels)
         {
-
+            var values = new List<int>();
+            int step = (int)Math.Floor(256f / (levels - 1));
+            values.Add(0);
+            values.Add(255);
+            for (int i = 1; i < levels - 1; i++)
+            {
+                values.Add(i * step);
+            }
+            return values;
+        }
+        private byte clampColor(double value)
+        {
+            int result = (int)Math.Floor(value);
+            if (result > 255) result = 255;
+            if (result < 0) result = 0;
+            return (byte)result;
         }
     }
 }

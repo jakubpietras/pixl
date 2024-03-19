@@ -210,7 +210,6 @@ namespace Pixl
             ditherWindow.Owner = this;
             if (ditherWindow.ShowDialog().Value)
             {
-                MessageBox.Show("You did it girl!");
                 UpdateFilteredImage();
             }
         }
