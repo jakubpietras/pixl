@@ -206,9 +206,13 @@ namespace Pixl
 
         private void Dithering_Click(object sender, RoutedEventArgs e)
         {
-            var ditherWindow = new DitheringWindow();
+            var ditherWindow = new DitheringWindow(BitmapFiltered);
             ditherWindow.Owner = this;
-            ditherWindow.Show();
+            if (ditherWindow.ShowDialog().Value)
+            {
+                MessageBox.Show("You did it girl!");
+                UpdateFilteredImage();
+            }
         }
     }
 }

@@ -13,8 +13,8 @@
         Background="DimGray"
         >
     <StackPanel>
-        <TabControl Background="DimGray">
-            <TabItem Header="Color">
+        <TabControl Background="DimGray" Name="DitherModeTab">
+            <TabItem Header="Color" Name="Color">
                 <StackPanel Background="DimGray">
                     <DockPanel VerticalAlignment="Center" Margin="10">
                         <Label DockPanel.Dock="Left" Content="Red levels" Foreground="White"/>
@@ -33,7 +33,7 @@
                     </DockPanel>
                 </StackPanel>
             </TabItem>
-            <TabItem Header="Grayscale">
+            <TabItem Header="Grayscale" Name="Grayscale">
                 <StackPanel Background="DimGray">
                     <DockPanel VerticalAlignment="Center" Margin="10">
                         <Label DockPanel.Dock="Left" Content="Gray levels" Foreground="White"/>
@@ -44,8 +44,12 @@
             </TabItem>
         </TabControl>
         <Label Content="Dithering method:" Foreground="White" FontWeight="Bold"/>
-        <ComboBox Name="cmbKernel" Margin="10">
-
+        <ComboBox Name="cmbFilters" Margin="10">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <Label Content="{Binding Name}" />
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
         </ComboBox>
         <Button Content="Apply" Margin="10" Width="100" Click="Apply_Click"/>
     </StackPanel>
