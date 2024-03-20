@@ -25,15 +25,15 @@ namespace Pixl
         public class DitheringFilter
         {
             public string Name { get; set; }
-            public int SizeX { get; set; }
-            public int SizeY { get; set; } 
+            public int Columns { get; set; }
+            public int Rows { get; set; } 
             public double[,] Coefficients {  get; set; } 
 
-            public DitheringFilter(string name, int sizeX, int sizeY, double[,] coefficients)
+            public DitheringFilter(string name, int rows, int columns, double[,] coefficients)
             {
                 Name = name;
-                SizeX = sizeX;
-                SizeY = sizeY;
+                Rows = rows; // Number of rows in the kernel
+                Columns = columns; // Number of columns in the kernel
                 Coefficients = coefficients;
             }
         };
@@ -93,37 +93,38 @@ namespace Pixl
 
                 int pixelCount = Bitmap.PixelWidth * Bitmap.PixelHeight;
 
-                for (int column = 0; column < Bitmap.PixelHeight; column++)
+                for (int row = 0; row < Bitmap.PixelHeight; row++)
                 {
-                    for (int row = 0; row < Bitmap.PixelWidth; row++)
+                    for (int column = 0; column < Bitmap.PixelWidth; column++)
                     {
-                        int spanX = (int)Math.Floor(df.SizeX / 2.0);
-                        int spanY = (int)Math.Floor(df.SizeY / 2.0);
+                        int rowSpan = (int)Math.Floor(df.Rows / 2.0);
+                        int colSpan = (int)Math.Floor(df.Columns / 2.0);
 
                         unsafe
                         {
-                            byte* pPixel = (byte*)pBackBuffer + column * stride + row * 4; // Assuming BGRA
+                            byte* pPixel = (byte*)pBackBuffer + row * stride + column * 4; // Assuming BGRA
                             int gray = (int)(0.2126 * pPixel[2] + 0.7152 * pPixel[1] + 0.0722 * pPixel[0]);
                             int approx = grayValues.Aggregate((x, y) => Math.Abs(x - gray) < Math.Abs(y - gray) ? x : y);
 
                             // Drawing a pixel
-                            byte* pResultPixel = (byte*)(pResultBackBuffer + column * stride + row * 4);
+                            byte* pResultPixel = (byte*)(pResultBackBuffer + row * stride + column * 4);
                             pResultPixel[0] = (byte)approx;
                             pResultPixel[1] = (byte)approx;
                             pResultPixel[2] = (byte)approx;
 
                             // Error diffusion
                             int error = gray - approx;
-                            for (int i = -spanX; i <= spanX; ++i)
+                            for (int dr = -rowSpan; dr <= rowSpan; ++dr)
                             {
-                                for (int j = -spanY; j <= spanY; ++j)
+                                for (int dc = -colSpan; dc <= colSpan; ++dc)
                                 {
-                                    //int neighborIndex = (column + i) * stride + (row + j) * 4;
-                                    if (column + i >= 0 && column + i < Bitmap.PixelWidth && row + j >= 0 && row + j < Bitmap.PixelHeight)
+                                    if (column + dc >= 0 && column + dc < Bitmap.PixelWidth && row + dr >= 0 && row + dr < Bitmap.PixelHeight)
                                     {
-                                        byte* pNeighborPixel = pPixel + i * stride + j * 4;
-                                        pNeighborPixel[0] = pNeighborPixel[1] = pNeighborPixel[2] =
-                                            clampColor(pNeighborPixel[0] + error * df.Coefficients[i + spanX, j + spanY]);
+                                        byte* pNeighborPixel = pPixel + dr * stride + dc * 4;
+                                        byte color = clampColor(pNeighborPixel[0] + error * df.Coefficients[dr + rowSpan, dc + colSpan]);
+                                        pNeighborPixel[0] = color;
+                                        pNeighborPixel[1] = color;
+                                        pNeighborPixel[2] = color;
                                     }
                                     
                                 }
