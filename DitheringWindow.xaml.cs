@@ -25,13 +25,15 @@ namespace Pixl
         public class DitheringFilter
         {
             public string Name { get; set; }
-            public int Size { get; set; }
+            public int SizeX { get; set; }
+            public int SizeY { get; set; } 
             public double[,] Coefficients {  get; set; } 
 
-            public DitheringFilter(string name, int size, double[,] coefficients)
+            public DitheringFilter(string name, int sizeX, int sizeY, double[,] coefficients)
             {
                 Name = name;
-                Size = size;
+                SizeX = sizeX;
+                SizeY = sizeY;
                 Coefficients = coefficients;
             }
         };
@@ -44,8 +46,13 @@ namespace Pixl
             ditheringFilters =
             [
                 // Floyd-Steinberg
-                new DitheringFilter("Floyd-Steinberg", 3, new double[,] { { 0, 0, 0 }, { 0, 0, 7 / 16 }, { 3 / 16, 5 / 16, 1 / 16 } }),
-                new DitheringFilter("Burkes", 3, new double[,] { { 0, 0, 0 }, { 0, 0, 7 / 16 }, { 3 / 16, 5 / 16, 1 / 16 } })
+                new DitheringFilter("Floyd-Steinberg", 3, 3, new double[,] { { 0, 0, 0 }, { 0, 0, 7.0 / 16 }, { 3.0 / 16, 5.0 / 16, 1.0 / 16 } }),
+                new DitheringFilter("Burkes", 3, 5, new double[,] { {0, 0, 0, 0, 0 }, { 0, 0, 0, 8.0 / 32, 4.0 / 32}, {2.0 / 32, 4.0 / 32, 8.0 / 32, 4.0 / 32, 2.0 / 32 } }),
+                new DitheringFilter("Stucky", 5, 5, new double [,] {{0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 }, {0, 0, 0, 8.0 / 42, 4.0 / 42 },
+                    {2.0 / 42, 4.0 / 42, 8.0 / 42, 4.0 / 42, 2.0 / 42 }, {1.0 / 42, 2.0 / 42, 4.0 / 42, 2.0 / 42, 1.0 / 42 } }),
+                new DitheringFilter("Sierra", 5, 5, new double [,]{{0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 }, {0, 0, 0, 5.0 / 32, 3.0 / 32}, {2.0 / 32, 4.0 / 32, 5.0 / 32, 4.0 / 32, 2.0 / 32},
+                {0, 2.0 / 32, 3.0 / 32, 2.0 / 32, 0} }),
+                new DitheringFilter("Atkinson", 5, 5, new double[,]{{0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 }, {0, 0, 0, 1.0 / 8, 1.0 / 8}, {0, 1.0 / 8, 1.0 / 8, 1.0 / 8, 0 }, { 0, 0, 1.0 / 8, 0, 0 } })
             ];
             cmbFilters.ItemsSource = ditheringFilters;
             DataContext = this;
@@ -90,7 +97,8 @@ namespace Pixl
                 {
                     for (int row = 0; row < Bitmap.PixelWidth; row++)
                     {
-                        int span = (int)Math.Floor(df.Size / 2.0);
+                        int spanX = (int)Math.Floor(df.SizeX / 2.0);
+                        int spanY = (int)Math.Floor(df.SizeY / 2.0);
 
                         unsafe
                         {
@@ -103,6 +111,23 @@ namespace Pixl
                             pResultPixel[0] = (byte)approx;
                             pResultPixel[1] = (byte)approx;
                             pResultPixel[2] = (byte)approx;
+
+                            // Error diffusion
+                            int error = gray - approx;
+                            for (int i = -spanX; i <= spanX; ++i)
+                            {
+                                for (int j = -spanY; j <= spanY; ++j)
+                                {
+                                    //int neighborIndex = (column + i) * stride + (row + j) * 4;
+                                    if (column + i >= 0 && column + i < Bitmap.PixelWidth && row + j >= 0 && row + j < Bitmap.PixelHeight)
+                                    {
+                                        byte* pNeighborPixel = pPixel + i * stride + j * 4;
+                                        pNeighborPixel[0] = pNeighborPixel[1] = pNeighborPixel[2] =
+                                            clampColor(pNeighborPixel[0] + error * df.Coefficients[i + spanX, j + spanY]);
+                                    }
+                                    
+                                }
+                            }
                         }
                     }
                 }
