@@ -142,7 +142,73 @@ namespace Pixl
         }
         private void ColorDither(DitheringFilter df)
         {
+            WriteableBitmap result = new WriteableBitmap(Bitmap);
 
+            List<int> redValues = GenerateValues((int)sliderRed.Value);
+            List<int> greenValues = GenerateValues((int)sliderGreen.Value);
+            List<int> blueValues = GenerateValues((int)sliderBlue.Value);
+
+            Bitmap.Lock();
+            result.Lock();
+            try
+            {
+                IntPtr pBackBuffer = Bitmap.BackBuffer;
+                IntPtr pResultBackBuffer = result.BackBuffer;
+                int stride = Bitmap.BackBufferStride;
+
+                int pixelCount = Bitmap.PixelWidth * Bitmap.PixelHeight;
+                for (int row = 0; row < Bitmap.PixelHeight; row++)
+                {
+                    for (int column = 0; column < Bitmap.PixelWidth; column++)
+                    {
+                        int rowSpan = (int)Math.Floor(df.Rows / 2.0);
+                        int colSpan = (int)Math.Floor(df.Columns / 2.0);
+
+                        unsafe
+                        {
+                            byte* pPixel = (byte*)pBackBuffer + row * stride + column * 4; // Assuming BGRA
+                            int red = pPixel[2], green = pPixel[1], blue = pPixel[0];
+                            int redApprox = redValues.Aggregate((x, y) => Math.Abs(x - red) < Math.Abs(y - red) ? x : y);
+                            int greenApprox = greenValues.Aggregate((x, y) => Math.Abs(x - green) < Math.Abs(y - green) ? x : y);
+                            int blueApprox = blueValues.Aggregate((x, y) => Math.Abs(x - blue) < Math.Abs(y - blue) ? x : y);
+
+
+                            // Drawing a pixel
+                            byte* pResultPixel = (byte*)(pResultBackBuffer + row * stride + column * 4);
+                            pResultPixel[0] = (byte)blueApprox;
+                            pResultPixel[1] = (byte)greenApprox;
+                            pResultPixel[2] = (byte)redApprox;
+
+                            // Error diffusion
+                            int errorRed = red - redApprox;
+                            int errorGreen = green - greenApprox;
+                            int errorBlue = blue - blueApprox;
+
+                            for (int dr = -rowSpan; dr <= rowSpan; ++dr)
+                            {
+                                for (int dc = -colSpan; dc <= colSpan; ++dc)
+                                {
+                                    if (column + dc >= 0 && column + dc < Bitmap.PixelWidth && row + dr >= 0 && row + dr < Bitmap.PixelHeight)
+                                    {
+                                        byte* pNeighborPixel = pPixel + dr * stride + dc * 4;
+                                        pNeighborPixel[0] = clampColor(pNeighborPixel[0] + errorBlue * df.Coefficients[dr + rowSpan, dc + colSpan]);
+                                        pNeighborPixel[1] = clampColor(pNeighborPixel[1] + errorRed * df.Coefficients[dr + rowSpan, dc + colSpan]);
+                                        pNeighborPixel[2] = clampColor(pNeighborPixel[2] + errorGreen * df.Coefficients[dr + rowSpan, dc + colSpan]);
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+                Bitmap.WritePixels(new Int32Rect(0, 0, Bitmap.PixelWidth, Bitmap.PixelHeight), result.BackBuffer, stride * Bitmap.PixelHeight, stride);
+
+            }
+            finally
+            {
+                Bitmap.Unlock();
+                result.Unlock();
+            }
         }
 
         private List<int> GenerateValues(int levels)
