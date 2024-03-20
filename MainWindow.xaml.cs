@@ -6,6 +6,8 @@ using System.IO;
 using System.Collections.ObjectModel;
 using Point = System.Windows.Point;
 using System.IO.MemoryMappedFiles;
+using System.Drawing;
+using Microsoft.VisualBasic;
 
 namespace Pixl
 {
@@ -15,6 +17,21 @@ namespace Pixl
         WriteableBitmap? BitmapFiltered { get; set; }
         Dictionary<string, IFilter> Filters;
         private ObservableCollection<PolylineFilter> PolylineFilters;
+
+        protected class Color
+        {
+            byte Red { get; set; }
+            byte Green { get; set; }
+            byte Blue { get; set; }
+            public Color(byte red, byte green, byte blue)
+            {
+                Red = red;
+                Green = green;
+                Blue = blue;
+            }
+   
+        };
+
         public MainWindow()
         {
             InitializeComponent();
@@ -212,6 +229,44 @@ namespace Pixl
             {
                 UpdateFilteredImage();
             }
+        }
+
+        private void Quantization_Click(object sender, RoutedEventArgs e)
+        {
+            if (BitmapDefault == null)
+                return;
+
+            Dictionary<Color, int> colorFreq = new Dictionary<Color, int>();
+
+            BitmapFiltered.Lock();
+            try
+            {
+                IntPtr pBackBuffer = BitmapFiltered.BackBuffer;
+                int pixelCount = BitmapFiltered.PixelWidth * BitmapFiltered.PixelHeight;
+                unsafe
+                {
+                    // Build dictionary of colors
+                    for (int counter = 0; counter < pixelCount; counter++)
+                    {
+                        byte* pPixel = (byte*)pBackBuffer + counter * 4; // Assuming BGRA
+                        Color c = new Color(pPixel[2], pPixel[1], pPixel[0]);
+                        if (!colorFreq.ContainsKey(c))
+                            colorFreq.Add(c, 1);
+                        else
+                        {
+                            colorFreq[c]++;
+                        }
+                    }
+
+
+                }
+                BitmapFiltered.AddDirtyRect(new Int32Rect(0, 0, BitmapFiltered.PixelWidth, BitmapFiltered.PixelHeight));
+            }
+            finally
+            {
+                BitmapFiltered.Unlock();
+            }
+
         }
     }
 }

@@ -192,8 +192,8 @@ namespace Pixl
                                     {
                                         byte* pNeighborPixel = pPixel + dr * stride + dc * 4;
                                         pNeighborPixel[0] = clampColor(pNeighborPixel[0] + errorBlue * df.Coefficients[dr + rowSpan, dc + colSpan]);
-                                        pNeighborPixel[1] = clampColor(pNeighborPixel[1] + errorRed * df.Coefficients[dr + rowSpan, dc + colSpan]);
-                                        pNeighborPixel[2] = clampColor(pNeighborPixel[2] + errorGreen * df.Coefficients[dr + rowSpan, dc + colSpan]);
+                                        pNeighborPixel[1] = clampColor(pNeighborPixel[1] + errorGreen * df.Coefficients[dr + rowSpan, dc + colSpan]);
+                                        pNeighborPixel[2] = clampColor(pNeighborPixel[2] + errorRed * df.Coefficients[dr + rowSpan, dc + colSpan]);
                                     }
 
                                 }
@@ -221,6 +221,8 @@ namespace Pixl
             {
                 values.Add(i * step);
             }
+
+            values.Sort();
             return values;
         }
         private byte clampColor(double value)

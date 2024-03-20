@@ -35,7 +35,7 @@
                     <GroupBox Header="Color depth options" Foreground="White">
                         <StackPanel>
                             <Button Content="Dithering" Click="Dithering_Click" />
-                            <Button Content="Quantization" />
+                            <Button Content="Quantization" Click="Quantization_Click" />
                         </StackPanel>
                     </GroupBox>
                     <Separator />
