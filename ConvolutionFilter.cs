@@ -14,7 +14,7 @@ public class ConvolutionFilter : IFilter
     {
         if (coefficients.Count() != size * size)
         {
-            throw new Exception("Bitch wtf u doing");
+            throw new Exception("Incorrect size");
         }
 
         Name = name;
