@@ -8,6 +8,7 @@ using Point = System.Windows.Point;
 using System.IO.MemoryMappedFiles;
 using System.Drawing;
 using Microsoft.VisualBasic;
+using System.Collections.Generic;
 
 namespace Pixl
 {
@@ -18,16 +19,24 @@ namespace Pixl
         Dictionary<string, IFilter> Filters;
         private ObservableCollection<PolylineFilter> PolylineFilters;
 
-        protected class Color
+        public class Color
         {
-            byte Red { get; set; }
-            byte Green { get; set; }
-            byte Blue { get; set; }
+            public byte Red { get; set; }
+            public byte Green { get; set; }
+            public byte Blue { get; set; }
             public Color(byte red, byte green, byte blue)
             {
                 Red = red;
                 Green = green;
                 Blue = blue;
+            }
+
+            public double Distance(Color other)
+            {
+                int dR = Red - other.Red;
+                int dG = Green - other.Green;
+                int dB = Blue - other.Blue;
+                return Math.Sqrt(dR * dR + dG * dG + dB * dB);
             }
    
         };
@@ -237,6 +246,8 @@ namespace Pixl
                 return;
 
             Dictionary<Color, int> colorFreq = new Dictionary<Color, int>();
+            int n = 500; // Amount of colors
+            int margin = 70;
 
             BitmapFiltered.Lock();
             try
@@ -250,15 +261,35 @@ namespace Pixl
                     {
                         byte* pPixel = (byte*)pBackBuffer + counter * 4; // Assuming BGRA
                         Color c = new Color(pPixel[2], pPixel[1], pPixel[0]);
-                        if (!colorFreq.ContainsKey(c))
-                            colorFreq.Add(c, 1);
+
+                        Color roundedColor = new Color(
+                            (byte)(c.Red / margin * margin),
+                            (byte)(c.Green / margin * margin),
+                            (byte)(c.Blue / margin * margin)
+                        );
+
+                        if (!colorFreq.ContainsKey(roundedColor))
+                            colorFreq.Add(roundedColor, 1);
                         else
                         {
-                            colorFreq[c]++;
+                            colorFreq[roundedColor]++;
                         }
                     }
 
+                    List<Color> topColors = colorFreq.OrderByDescending(kv => kv.Value)
+                                .Take(n)
+                                .Select(kv => kv.Key)
+                                .ToList();
 
+                    for (int counter = 0; counter < pixelCount; counter++)
+                    {
+                        byte* pPixel = (byte*)pBackBuffer + counter * 4; // Assuming BGRA
+                        Color c = new Color(pPixel[2], pPixel[1], pPixel[0]);
+                        Color q = ClosestColor(topColors, c);
+                        pPixel[2] = q.Red;
+                        pPixel[1] = q.Green;
+                        pPixel[0] = q.Blue;
+                    }
                 }
                 BitmapFiltered.AddDirtyRect(new Int32Rect(0, 0, BitmapFiltered.PixelWidth, BitmapFiltered.PixelHeight));
             }
@@ -266,7 +297,24 @@ namespace Pixl
             {
                 BitmapFiltered.Unlock();
             }
-
         }
+
+        private Color ClosestColor(List<Color> colors, Color c)
+        {
+            double minDistance = c.Distance(colors[0]);
+            Color result = colors[0];
+
+            foreach(var otherColor in colors)
+            {
+                double distance = c.Distance(otherColor);
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    result = otherColor;
+                }
+            }
+            return result; 
+        }
+
     }
 }
